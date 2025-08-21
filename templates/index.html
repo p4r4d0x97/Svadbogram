@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Gallery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Media Gallery</h1>
+    </header>
+
+    <main>
+        <section class="upload-section">
+            <h2>Upload Photo or Video</h2>
+            <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept="image/png,image/jpeg,video/mp4,video/quicktime" capture="environment" required>
+                <button type="submit">Upload</button>
+            </form>
+            <a href="{{ url_for('download_all') }}" class="download-all-btn">Download All</a>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </section>
+
+        <section class="gallery">
+            <h2>Uploaded Media</h2>
+            <div class="media-grid">
+                {% for file in files|sort(attribute='upload_time', reverse=True) %}
+                    <div class="media-item">
+                        {% if file.type == 'video' %}
+                            <video controls>
+                                <source src="{{ file.url }}" type="video/{{ file.name.rsplit('.', 1)[1].lower() }}">
+                            </video>
+                        {% else %}
+                            <img src="{{ file.url }}" alt="{{ file.name }}">
+                        {% endif %}
+                        <p>{{ file.name }}</p>
+                        <p>Uploaded: {{ file.upload_time }}</p>
+                        <a href="{{ url_for('download_file', filename=file.name) }}" class="download-btn">Download</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
